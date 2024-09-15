@@ -27,6 +27,7 @@
       "**/*ParserVisitor.ts",
       "**/*queries.ts",
       "packages/example/**/*.ts",
+      "packages/**/lib/*.cts",
       "packages/query/src/loader/*/{index,query}.ts",
       "packages/query/src/loader/*/parser/**/*.ts"
     ]
