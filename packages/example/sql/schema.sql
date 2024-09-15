@@ -101,3 +101,11 @@ CREATE TABLE book_country (
 
 INSERT INTO book_country (country)
 VALUES ('CZ'), ('DE');
+
+CREATE SCHEMA IF NOT EXISTS customschema;
+CREATE TABLE customschema.tableincustomschema (
+  id SERIAL PRIMARY KEY,
+  name TEXT
+);
+INSERT INTO customschema.tableincustomschema (name)
+VALUES ('First record in custom schema');

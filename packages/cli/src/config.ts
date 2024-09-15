@@ -6,12 +6,9 @@ import * as t from 'io-ts';
 import { reporter } from 'io-ts-reporters';
 import { createRequire } from 'module';
 import { isAbsolute, join } from 'path';
+import { URL } from 'url';
 import tls from 'tls';
-import { DatabaseConfig, default as dbUrlModule } from 'ts-parse-database-url';
 import { TypeDefinition } from './types.js';
-
-// module import hack
-const { default: parseDatabaseUri } = dbUrlModule as any;
 
 const transformCodecProps = {
   include: t.string,
@@ -94,6 +91,7 @@ export interface ParsedConfig {
     dbName: string;
     port: number;
     ssl?: tls.ConnectionOptions | boolean;
+    options?: string;
   };
   maxWorkerThreads: number | undefined;
   failOnError: boolean;
@@ -115,19 +113,15 @@ function merge<T>(base: T, ...overrides: Partial<T>[]): T {
   );
 }
 
-function convertParsedURLToDBConfig({
-  host,
-  password,
-  user,
-  port,
-  database,
-}: DatabaseConfig) {
+function convertParsedURLToDBConfig(url: string) {
+  const parsedUrl = new URL(url);
   return {
-    host,
-    password,
-    user,
-    port,
-    dbName: database,
+    host: parsedUrl.hostname,
+    password: parsedUrl.password,
+    user: parsedUrl.username,
+    port: parsedUrl.port ? Number(parsedUrl.port) : 5432,
+    dbName: parsedUrl.pathname.slice(1),
+    options: parsedUrl.searchParams.get('options'),
   };
 }
 
@@ -186,6 +180,7 @@ export function parseConfig(
     password: process.env.PGPASSWORD,
     dbName: process.env.PGDATABASE,
     port: process.env.PGPORT ? Number(process.env.PGPORT) : undefined,
+    options: process.env.PGOPTIONS,
     uri: process.env.PGURI ?? process.env.DATABASE_URL,
   };
 
@@ -204,9 +199,7 @@ export function parseConfig(
   // CLI connectionUri flag takes precedence over the env and config one
   const dbUri = argConnectionUri || envDBConfig.uri || configDbUri;
 
-  const urlDBConfig = dbUri
-    ? convertParsedURLToDBConfig(parseDatabaseUri(dbUri))
-    : {};
+  const urlDBConfig = dbUri ? convertParsedURLToDBConfig(dbUri) : {};
 
   if (transforms.some((tr) => tr.mode !== 'ts-implicit' && !!tr.emitFileName)) {
     // tslint:disable:no-console
