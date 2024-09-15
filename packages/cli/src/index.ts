@@ -39,7 +39,11 @@ export class WorkerPool {
 
   public async run<T>(opts: T, functionName: string) {
     try {
-      return this.pool.run(opts, { name: functionName });
+      const result = await this.pool.run(opts, { name: functionName });
+      if (result.error) {
+        throw result.error;
+      }
+      return result;
     } catch (err) {
       if (err instanceof Error) {
         const isWorkerTermination = err.message === 'Terminating worker thread';
