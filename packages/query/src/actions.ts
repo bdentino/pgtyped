@@ -34,16 +34,18 @@ export async function startup(
     user: string;
     dbName: string;
     ssl?: tls.ConnectionOptions | boolean;
+    options?: string;
   },
   queue: AsyncQueue,
 ) {
   try {
     await queue.connect(options);
-    const startupParams = {
+    const startupParams: Record<string, string> = {
       user: options.user,
       database: options.dbName,
       client_encoding: "'utf-8'",
     };
+    if (options.options) startupParams.options = options.options;
     await queue.send(messages.startupMessage, { params: startupParams });
     const result = await queue.reply(
       messages.readyForQuery,

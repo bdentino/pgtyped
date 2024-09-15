@@ -19,6 +19,9 @@ import {
   selectExistsTest,
 } from './comments/comments.queries.js';
 import {
+  getCustomSchemaRecords,
+} from './custom/custom.queries.js';
+import {
   insertNotification,
   insertNotifications,
 } from './notifications/notifications.js';
@@ -39,6 +42,7 @@ const dbConfig = {
   password: process.env.PGPASSWORD ?? 'password',
   database: process.env.PGDATABASE ?? 'postgres',
   port: (process.env.PGPORT ? Number(process.env.PGPORT) : undefined) ?? 5432,
+  options: process.env.PGOPTIONS ?? '-c search_path=public,customschema',
 };
 
 // Connect to the database once before all tests
@@ -236,4 +240,9 @@ test('select query with a bigint field', async () => {
 test('ts-implicit mode query', async () => {
   const books = await sql(`SELECT * FROM books WHERE id = $id`).run({id: 1}, client);
   expect(books).toMatchSnapshot();
+});
+
+test('select query on table in custom schema', async () => {
+  const result = await getCustomSchemaRecords.run({ id: 1 }, client);
+  expect(result).toMatchSnapshot();
 });

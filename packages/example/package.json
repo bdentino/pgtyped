@@ -16,6 +16,7 @@
   },
   "scripts": {
     "test": "docker compose run build && docker compose run test && docker compose run test-cjs",
+    "posttest": "docker compose down -v",
     "typegen": "pgtyped -c config.json",
     "build": "echo 'No build step required. Use npm test instead'",
     "watch": "echo 'No build step required. Use npm test instead'",

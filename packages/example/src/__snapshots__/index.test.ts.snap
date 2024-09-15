@@ -38,6 +38,15 @@ Array [
 ]
 `;
 
+exports[`select query on table in custom schema 1`] = `
+Array [
+  Object {
+    "id": 1,
+    "name": "First record in custom schema",
+  },
+]
+`;
+
 exports[`select query with dynamic or 1`] = `
 Array [
   Object {
